@@ -17,7 +17,7 @@ Standard Readme is designed for open source libraries. Although it’s [historic
 
 ## Table of Contents
 
-- [Background](#background)
+- [Background](#why is the project interesting?)
 - [Install](#install)
 - [Usage](#usage)
 	- [Generator](#generator)
@@ -28,6 +28,6 @@ Standard Readme is designed for open source libraries. Although it’s [historic
 - [Contributing](#contributing)
 - [License](#license)
 
-## Background
+## Why is the project interesting?
 
 
