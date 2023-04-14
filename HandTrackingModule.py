@@ -3,6 +3,8 @@ import mediapipe as mp
 import time
 import math
 
+import numpy as np
+
 
 class handDetector():
     def __init__(self, mode=False, maxHands=2, modelComplexity=1, detectionCon=0.5, trackCon=0.5):
@@ -33,6 +35,7 @@ class handDetector():
         xList = []
         yList = []
         bbox = []
+        save_points = np.array([0, 0])
         self.lmList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
@@ -42,6 +45,8 @@ class handDetector():
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 xList.append(cx)
                 yList.append(cy)
+                if id == 8:
+                    save_points = np.array([cx,cy])
                 # print(id, cx, cy)
                 self.lmList.append([id, cx, cy])
                 if draw:
@@ -52,7 +57,7 @@ class handDetector():
 
             if draw:
                 cv2.rectangle(img, (bbox[0] - 20, bbox[1] - 20), (bbox[2] + 20, bbox[3] + 20), (0, 255, 0), 2)
-        return self.lmList, bbox
+        return self.lmList, bbox, save_points
 
     def findDistance(self, p1, p2, img, draw=True):
         x1, y1 = self.lmList[p1][1], self.lmList[p1][2]
@@ -91,22 +96,31 @@ def main():
     cTime = 0
     cap = cv2.VideoCapture(0)
     detector = handDetector()
+    out = cv2.VideoWriter('output.mov', -1, 20.0, (640, 480))
+    success, img = cap.read()
+    picture = np.zeros_like(img)
     while True:
         success, img = cap.read()
+        img=cv2.flip(img,1)
         img = detector.findHands(img)
-        lmList = detector.findPosition(img)
-        if len(lmList) != 0:
-            print(lmList[1])
-
+        lmList, bbox, save_point = detector.findPosition(img)
+        #if len(lmList) != 0:
+        #    print(lmList[1])
+        cv2.circle(picture, (save_point[0], save_point[1]), 15, (0, 0, 400), cv2.FILLED)
+        imgadd = cv2.add(img, picture)
         cTime = time.time()
         fps = 1. / (cTime - pTime)
         pTime = cTime
 
-        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-
-        cv2.imshow("Image", img)
-        cv2.waitKey(1)
-
+        #cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        out.write(imgadd)
+        cv2.imshow("Image", imgadd)
+        #cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):  # выход по q
+            break
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
