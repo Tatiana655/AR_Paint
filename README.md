@@ -9,5 +9,6 @@ The program receives the video stream from the camera on the computer in real ti
 ## How to use?
 1.To run the program, you need to install OpenCV, Python.
 2.
+By default, the program will use the camera connected to the computer to shoot video, but you can also use video recording.
 
 ## Interface example
