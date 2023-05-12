@@ -45,8 +45,19 @@ class handDetector():
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 xList.append(cx)
                 yList.append(cy)
+                if id == 1:
+                    p1 = np.array([cx,cy])
+                if id == 4:
+                    p4 = np.array([cx,cy])
                 if id == 8:
-                    save_points = np.array([cx,cy])
+                    p8 = np.array([cx, cy])
+                    a = sum((p1 - p4) ** 2) ** 0.5
+                    b = sum((p1 - p8) ** 2) ** 0.5
+                    cl = sum((p4 - p8) ** 2) ** 0.5
+                    angle_a = round(math.degrees(math.acos((b ** 2 + cl ** 2 - a ** 2) / (2 * b * cl))), 0)
+
+                    if angle_a < 15:
+                        save_points = np.array([cx,cy])
                 # print(id, cx, cy)
                 self.lmList.append([id, cx, cy])
                 if draw:
