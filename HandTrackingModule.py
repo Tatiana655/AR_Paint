@@ -35,7 +35,7 @@ class handDetector():
         xList = []
         yList = []
         bbox = []
-        save_points = np.array([0, 0])
+        save_points = np.array([-1, -1])
         self.lmList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
@@ -99,15 +99,30 @@ def main():
     out = cv2.VideoWriter('output.mov', -1, 20.0, (640, 480))
     success, img = cap.read()
     picture = np.zeros_like(img)
+    previos_point= (-1, -1)
     while True:
         success, img = cap.read()
-        img=cv2.flip(img,1)
+        img=cv2.flip(img, 1)
         img = detector.findHands(img)
         lmList, bbox, save_point = detector.findPosition(img)
+        if save_point[0] == 0 and save_point[1] == 0:
+            save_point[0] = -1
+            save_point[1] = -1
+
         #if len(lmList) != 0:
         #    print(lmList[1])
-        cv2.circle(picture, (save_point[0], save_point[1]), 15, (0, 0, 400), cv2.FILLED)
-        imgadd = cv2.add(img, picture)
+        if previos_point == (-1, -1):
+            cv2.circle(picture, (save_point[0], save_point[1]), 7, (0, 255, 255), cv2.FILLED)
+        else:
+            if ((save_point[0]-previos_point[0]) ** 2 + (save_point[1]-previos_point[1]) ** 2) ** 0.5 < 100:
+                cv2.line(picture, (save_point[0], save_point[1]), previos_point, (0,255, 255), thickness=15)
+
+        if save_point[0] != -1 and save_point[1] != -1:
+            previos_point = (save_point[0], save_point[1])
+        if save_point[0] == -1 and save_point[1] == -1:
+            previos_point = (-1, -1)
+        #imgadd = cv2.add(img, picture)
+        imgadd = cv2.subtract(img, picture)
         cTime = time.time()
         fps = 1. / (cTime - pTime)
         pTime = cTime
